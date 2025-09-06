@@ -27,14 +27,6 @@
     group: root
     mode: '0755'
 
-- name: Copy sysupgrade configuration to preserve files across upgrades
-  copy:
-    src: files/etc/sysupgrade.conf
-    dest: /etc/sysupgrade.conf
-    owner: root
-    group: root
-    mode: '0644'
-
 - name: Reload attendedsysupgrade configuration
   command: uci commit attendedsysupgrade
   when: attendedsysupgrade_config.changed
