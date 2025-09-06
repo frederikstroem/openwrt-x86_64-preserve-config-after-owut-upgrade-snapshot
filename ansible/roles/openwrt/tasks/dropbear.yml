@@ -1,0 +1,23 @@
+---
+- name: Set authorized_keys for dropbear
+  copy:
+    dest: /etc/dropbear/authorized_keys
+    content: |
+      # TODO: Add public keys here.
+    owner: root
+    group: root
+    mode: '0600'
+  register: dropbear_keys
+
+- name: Copy dropbear configuration
+  copy:
+    src: files/etc/config/dropbear
+    dest: /etc/config/dropbear
+    owner: root
+    group: root
+    mode: '0600'
+  register: dropbear_config
+
+- name: Restart dropbear service
+  command: /etc/init.d/dropbear restart
+  when: dropbear_config.changed or dropbear_keys.changed

@@ -1,0 +1,24 @@
+---
+- name: Create .config directory
+  file:
+    path: /root/.config
+    state: directory
+    mode: '0755'
+
+- name: Create btop config directory
+  file:
+    path: /root/.config/btop
+    state: directory
+    mode: '0755'
+
+- name: Copy bashrc to /root/.bashrc
+  copy:
+    src: home/bashrc
+    dest: /root/.bashrc
+    mode: '0644'
+
+- name: Copy btop configuration
+  copy:
+    src: home/config/btop/btop.conf
+    dest: /root/.config/btop/btop.conf
+    mode: '0644'

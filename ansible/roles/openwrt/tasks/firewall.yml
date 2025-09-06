@@ -1,0 +1,13 @@
+---
+- name: Copy firewall configuration
+  copy:
+    src: files/etc/config/firewall
+    dest: /etc/config/firewall
+    owner: root
+    group: root
+    mode: '0644'
+  register: firewall_config
+
+- name: Restart firewall service
+  command: /etc/init.d/firewall restart
+  when: firewall_config.changed

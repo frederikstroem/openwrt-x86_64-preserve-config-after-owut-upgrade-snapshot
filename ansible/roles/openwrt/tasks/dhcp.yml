@@ -1,0 +1,13 @@
+---
+- name: Copy DHCP configuration
+  copy:
+    src: files/etc/config/dhcp
+    dest: /etc/config/dhcp
+    owner: root
+    group: root
+    mode: '0600'
+  register: dhcp_config
+
+- name: Restart DHCP service (dnsmasq)
+  command: /etc/init.d/dnsmasq restart
+  when: dhcp_config.changed

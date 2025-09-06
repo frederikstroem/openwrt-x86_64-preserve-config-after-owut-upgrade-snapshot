@@ -1,0 +1,13 @@
+---
+- name: Copy uhttpd configuration
+  copy:
+    src: files/etc/config/uhttpd
+    dest: /etc/config/uhttpd
+    owner: root
+    group: root
+    mode: '0600'
+  register: uhttpd_config
+
+- name: Restart uhttpd service
+  command: /etc/init.d/uhttpd restart
+  when: uhttpd_config.changed

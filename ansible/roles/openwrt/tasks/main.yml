@@ -1,0 +1,88 @@
+---
+- include_tasks:
+    file: system.yml
+    apply:
+      tags:
+        - system
+  tags:
+    - system
+
+- include_tasks:
+    file: dropbear.yml
+    apply:
+      tags:
+        - dropbear
+  tags:
+    - dropbear
+
+- include_tasks:
+    file: opkg.yml
+    apply:
+      tags:
+        - opkg
+  tags:
+    - opkg
+
+- include_tasks:
+    file: home.yml
+    apply:
+      tags:
+        - home
+  tags:
+    - home
+
+- include_tasks:
+    file: network.yml
+    apply:
+      tags:
+        - network
+  tags:
+    - network
+
+- include_tasks:
+    file: uhttpd.yml
+    apply:
+      tags:
+        - uhttpd
+  tags:
+    - uhttpd
+
+- include_tasks:
+    file: dhcp.yml
+    apply:
+      tags:
+        - dhcp
+  tags:
+    - dhcp
+
+- include_tasks:
+    file: firewall.yml
+    apply:
+      tags:
+        - firewall
+  tags:
+    - firewall
+
+- include_tasks:
+    file: owut.yml
+    apply:
+      tags:
+        - owut
+  tags:
+    - owut
+  when: not (openwrt_post_upgrade_run | default(false))
+
+# Re-run all configuration tasks after OpenWrt upgrade to restore config.
+# This is needed because OpenWRT upgrades wipes a lot of configs, so this
+# ensures that everything is back to the desired state.
+- name: Re-run all configuration tasks after upgrade
+  include_tasks:
+    file: main.yml
+    apply:
+      vars:
+        openwrt_post_upgrade_run: true
+  when:
+    - owut_upgrade_performed | default(false)
+    - not (openwrt_post_upgrade_run | default(false))
+  tags:
+    - post-upgrade

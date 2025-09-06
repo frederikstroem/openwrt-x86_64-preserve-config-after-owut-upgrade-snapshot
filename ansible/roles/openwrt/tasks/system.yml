@@ -1,0 +1,13 @@
+---
+- name: Copy system configuration
+  copy:
+    src: files/etc/config/system
+    dest: /etc/config/system
+    owner: root
+    group: root
+    mode: '0600'
+  register: system_config
+
+- name: Reload system configuration
+  command: /etc/init.d/system reload
+  when: system_config.changed

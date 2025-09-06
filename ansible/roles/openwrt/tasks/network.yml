@@ -1,0 +1,13 @@
+---
+- name: Copy network configuration
+  copy:
+    src: files/etc/config/network
+    dest: /etc/config/network
+    owner: root
+    group: root
+    mode: '0600'
+  register: network_config
+
+- name: Restart network service
+  command: /etc/init.d/network restart
+  when: network_config.changed

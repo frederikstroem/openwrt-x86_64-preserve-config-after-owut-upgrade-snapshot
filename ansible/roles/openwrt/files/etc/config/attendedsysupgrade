@@ -1,0 +1,24 @@
+
+config server 'server'
+	option url 'https://sysupgrade.openwrt.org'
+
+config client 'client'
+	option upgrade_packages '1'
+	option auto_search '0'
+	option advanced_mode '0'
+
+config owut 'owut'
+	# OpenWRT version.
+	option version_to '24.10'
+	# Set max rootfs parition size.
+	option rootfs_size '1024'
+	# Explicitly set squashfs (though this should be detected).
+	option fstype 'squashfs'
+	# Enable verbose output for debugging.
+	option verbosity '1'
+	# Custom pre-install backup script.
+	option pre_install '/etc/owut.d/pre-install.sh'
+	# Custom init script to restore configs after upgrade.
+	option init_script '/etc/owut.d/custom-init.sh'
+	# Poll every 2 seconds during build.
+	option poll_interval '2000'

@@ -1,0 +1,101 @@
+---
+# owut: OpenWrt Upgrade Tool
+# https://openwrt.org/docs/guide-user/installation/sysupgrade.owut
+
+- name: Copy attendedsysupgrade configuration
+  copy:
+    src: files/etc/config/attendedsysupgrade
+    dest: /etc/config/attendedsysupgrade
+    owner: root
+    group: root
+    mode: '0600'
+  register: attendedsysupgrade_config
+
+- name: Copy pre-install backup script
+  copy:
+    src: files/etc/owut.d/pre-install.sh
+    dest: /etc/owut.d/pre-install.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy custom init script for config restoration
+  copy:
+    src: files/etc/owut.d/custom-init.sh
+    dest: /etc/owut.d/custom-init.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy sysupgrade configuration to preserve files across upgrades
+  copy:
+    src: files/etc/sysupgrade.conf
+    dest: /etc/sysupgrade.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Reload attendedsysupgrade configuration
+  command: uci commit attendedsysupgrade
+  when: attendedsysupgrade_config.changed
+
+# ⚠️ FIX: `Runtime error: Unable to dlopen file '/usr/lib/ucode/uloop.so': Error relocating /usr/lib/ucode/uloop.so: uc_vm_exception_object: symbol not found`
+# https://github.com/openwrt/packages/issues/27213#issuecomment-3189081750
+- name: Fix owut runtime error
+  shell: |
+    opkg update
+    opkg install ucode libucode
+
+- name: Check for updates with owut
+  shell: owut check
+  ignore_errors: true
+  changed_when: false
+  register: owut_check
+
+- name: Display owut check results
+  debug:
+    var: owut_check.stdout_lines
+  when: owut_check.stdout is defined
+
+- name: Upgrade OpenWrt using owut
+  when:
+    - "'out-of-date' in owut_check.stdout" # If `out-of-date` is in the output.
+  vars:
+    # Set the timeout for the upgrade process.
+    # This is the maximum time expected for the upgrade to take.
+    upgrade_timeout: "{{ 4 * 60 }}"
+  block:
+    - name: Set fact that upgrade is performed
+      set_fact:
+        owut_upgrade_performed: true
+
+    - name: Start OpenWrt upgrade
+      shell: owut upgrade
+      # Using async to prevent SSH connection loss from causing task failure.
+      async: "{{ upgrade_timeout }}"
+      # Using poll `0` to make Ansible start the task and immediately move on.
+      poll: 0
+      register: upgrade_job
+
+    - name: Wait for upgrade to complete ({{ (upgrade_timeout | int) // 60 }} minutes)
+      ansible.builtin.pause:
+        seconds: "{{ upgrade_timeout | int }}"
+        prompt: "Upgrade in progress, waiting {{ (upgrade_timeout | int) // 60 }} minutes for completion..."
+
+    ### Seems to be a bit flaky, as the device allows the Ansible playbook to continue, then suddenly goes offline, causing the playbook to fail.
+    # - name: Wait for device to go offline
+    #   wait_for:
+    #     host: "{{ inventory_hostname }}"
+    #     port: 22
+    #     state: stopped
+    #     timeout: 600 # Wait for up to 10 minutes for the device to go offline.
+    #   delegate_to: localhost
+    #   changed_when: false
+
+    # - name: Wait for device to come back online
+    #   ansible.builtin.wait_for_connection:
+    #     timeout: 300 # Wait for up to 5 minutes for the device to come back online.
+
+    # - name: Wait for 10 seconds to allow everything to settle
+    #   ansible.builtin.pause:
+    #     seconds: 10

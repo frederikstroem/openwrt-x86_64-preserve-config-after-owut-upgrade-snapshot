@@ -1,0 +1,15 @@
+---
+- name: Run opkg update
+  shell: opkg update
+
+- name: Install Python 3
+  shell: opkg install python3
+
+- name: Install LuCI
+  shell: opkg install luci
+
+- name: Install OpenSSH SFTP server
+  shell: opkg install openssh-sftp-server
+
+- name: Install owut (OpenWrt Upgrade Tool)
+  shell: opkg install owut
