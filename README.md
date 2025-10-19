@@ -1,5 +1,5 @@
 > [!NOTE]
-> Snapshot (2025-09-06) of the core components of my OpenWRT setup.
+> Snapshot (2025-10-19) of the core components of my OpenWRT setup.
 
 > [!CAUTION]
 > I'm not an OpenWRT expert and don't really know what I'm doing, so please be cautious if using this as a reference. 🐉

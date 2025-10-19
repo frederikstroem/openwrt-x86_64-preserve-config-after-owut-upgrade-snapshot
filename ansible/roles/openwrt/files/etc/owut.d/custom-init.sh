@@ -32,4 +32,12 @@ echo "Config restore completed"
 /etc/init.d/system reload
 /etc/init.d/uhttpd restart
 
+# Wait for services to stabilize, then ensure dropbear is fully operational.
+echo "Waiting for services to stabilize…"
+sleep 6
+
+# Restart dropbear once more to ensure SSH connectivity.
+echo "Final dropbear restart to ensure SSH connectivity…"
+/etc/init.d/dropbear restart
+
 exit 0
